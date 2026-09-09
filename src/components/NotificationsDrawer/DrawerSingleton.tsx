@@ -163,7 +163,12 @@ export class DrawerSingleton {
     if (isDuplicate) {
       return;
     }
-    DrawerSingleton._state.notificationData.push(notification);
+    // Reassign rather than push: consumers memoize on the array reference, so an in-place
+    // mutation leaves derived lists such as filteredNotifications stale
+    DrawerSingleton._state.notificationData = [
+      ...DrawerSingleton._state.notificationData,
+      notification,
+    ];
     DrawerSingleton._state.hasUnread = this.hasUnreadNotifications();
     DrawerSingleton._subs.forEach((sub) => sub.rerenderer());
   };

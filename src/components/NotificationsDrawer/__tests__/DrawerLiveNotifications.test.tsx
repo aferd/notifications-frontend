@@ -127,6 +127,20 @@ describe('drawer live notifications over the websocket', () => {
     expect(renderedTitles()).toEqual(['Notification live', 'Notification 1']);
   });
 
+  it('renders a live notification that matches an active filter', async () => {
+    await renderDrawer([makeNotification('1', 60)]);
+    // The filtered list is memoized on the notificationData reference, so an in-place push
+    // would leave it stale and the live notification would never appear
+    act(() => {
+      DrawerSingleton.Instance.setFilters(['rhel']);
+    });
+    expect(renderedTitles()).toEqual(['Notification 1']);
+
+    emitWsEvent(makeNotification('live', 0));
+
+    expect(renderedTitles()).toEqual(['Notification live', 'Notification 1']);
+  });
+
   it('flags unread when a live notification arrives', async () => {
     await renderDrawer([makeNotification('1', 60, true)]);
     expect(DrawerSingleton.getState().hasUnread).toBe(false);
